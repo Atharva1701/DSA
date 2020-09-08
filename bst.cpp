@@ -1,11 +1,16 @@
 #include<iostream>
-#include<cstdlib>
+#include<iomanip>
 using namespace std;
 class BST;
 class node
 {
 	int data;
 	node *right,*left;
+	public:
+	int retData()
+	{
+		return data;
+	}
 	friend class BST;
 };
 class BST
@@ -14,7 +19,7 @@ class BST
 	node *root;
 	BST()
 	{
-		root=NULL;
+		root=NULL;	
 	}
 	void create();
 	void display(node*,int);
@@ -22,81 +27,96 @@ class BST
 	void preorder(node*);
 	void postorder(node*);
 	int search(node*,int);
-	node* del(node*,int);
 	node* inordersucc(node*);
+	node* del(node*,int);
 	int height(node*);
 };
-void BST::create() //insert/create node in bst
+void BST::create()
 {
 	node *curr,*temp;
 	char ch;
 	do
 	{
-		curr=new node;
-		cout<<"\nEnter the data :";
-		cin>>curr->data;
-		curr->left=curr->right=NULL;
-		if(root==NULL)
-			root=curr;
-		else
+	curr=new node;
+	cout<<"\nEnter the value of the node :";
+	cin>>curr->data;
+	curr->right=curr->left=NULL;
+	if(root==NULL)
+		root=curr;
+	else
+	{
+		temp=root;
+		while(1)
 		{
-			temp=root;
-			while(1)
+			if(curr->data < temp->data)
 			{
-				if(curr->data < temp->data)
+				if(temp->left==NULL)
 				{
-					if(temp->left==NULL)
-					{
-						temp->left=curr;
-						break;
-					}
-					else
-						temp=temp->left;
+					temp->left=curr;
+					break;			
 				}
 				else
-				{
-					if(temp->right==NULL)
-					{
-						temp->right=curr;
-						break;
-					}
-					else
-						temp=temp->right;
-				}
+					temp=temp->left;		
 			}
-		}
-	cout<<"\nDo you want to add more ?(y/n)"<<endl;
+			else
+			{
+				if(temp->right==NULL)
+				{
+					temp->right=curr;
+					break;
+				}
+				else
+					temp=temp->right;
+			}
+		}		
+	}
+	cout<<"\nDo you want to add more (y/n)?";
 	cin>>ch;
-	}while(ch=='Y'||ch=='y');
+	}while(ch=='y'||ch=='Y');
 }
-void BST::display(node *root,int space) //display bst
+void BST::display(node *root,int space)
 {
 	int i;
 	if(root==NULL)
-	  return;
-	else
+		return;
+	/*else
 	{
-	//process right child first
-	display(root->right,space+1);
-	//print current node after space count
-	cout<<"\n";
-	for(i=0;i<space;i++)
-		cout<<"    ";
-	cout<<root->data;
-	//process left child
-	display(root->left,space+1);
-	}
+		display(root->right,space+2);
+		cout<<"\n";
+		for(i=0;i<space;i++)
+			cout<<"       ";
+		if(this->root==root)
+			cout<<"Root-> ";
+		cout<<root->data;
+		display(root->left,space+2);
+	}*/
+	if(root!=NULL)
+	{
+        	if(root->right)
+            		display(root->right,space+4);
+       		if(space)
+            		cout<<setw(space)<<' ';
+		if(root->right)
+			cout<<" /\n"<<setw(space)<<' ';
+		cout<<root->data<<"\n ";
+		if(root->left) 
+		{
+		    cout<<setw(space)<<' '<<" \\\n";
+		    display(root->left,space+4);
+		}
+   	}
+		
 }
-void BST::inorder(node* root) //inorder
+void BST::inorder(node *root)
 {
 	if(root!=NULL)
 	{
 		inorder(root->left);
 		cout<<"\t"<<root->data;
 		inorder(root->right);
-	}	
+	}
 }
-void BST::preorder(node* root) //preorder
+void BST::preorder(node *root)
 {
 	if(root!=NULL)
 	{
@@ -105,7 +125,7 @@ void BST::preorder(node* root) //preorder
 		preorder(root->right);
 	}
 }
-void BST::postorder(node* root) //postorder
+void BST::postorder(node *root)
 {
 	if(root!=NULL)
 	{
@@ -114,56 +134,66 @@ void BST::postorder(node* root) //postorder
 		cout<<"\t"<<root->data;
 	}
 }
-int BST::search(node *root,int key) //search
+int BST::search(node *root,int key)
 {
+	if(root==NULL)
+		return -1;
 	if(root!=NULL)
 	{
 		if(root->data==key)
 			return 1;
 		else if(root->data>key)
-				search(root->left,key);
+			search(root->left,key);
 		else if(root->data<key)
-				search(root->right,key);
+			search(root->right,key);
+		else 
+			return 0;
 	}
-	else
-		return 0;
 }
-node* BST::inordersucc(node *root) //find inorder successor
+node* BST :: inordersucc(node* root)
 {
-	node *current=root;
+	node * current =root;
 	while(current->left!=NULL)
 		current=current->left;
 	return current;
 }
-node* BST::del(node* root,int key) //del a node in bst
+node* BST::del(node *root,int item)
 {
 	if(root==NULL)
-		return NULL;
-	else if(root->data>key)
-			root->left=del(root->left,key);
-	else if(root->data<key)
-			root->right=del(root->right,key);
+		return root;
+	else if(item < root->data)
+		root->left=del(root->left,item);
+	else if(item>root->data)
+		root->right=del(root->right,item);
 	else
 	{
-			if(root->left==NULL)
+			if(root->right == NULL && root->left == NULL)
 			{
-				node *temp=root->right;
 				delete root;
-				return temp;
+				root=NULL;
+			}
+			else if(root->left==NULL)
+			{
+				node* temp=root;
+				root=root->right;
+				delete temp;
 			}
 			else if(root->right==NULL)
 			{
-				node *temp=root->left;
-				delete root;
-				return temp;
+				node* temp=root;
+				root=root->left;
+				delete temp;
 			}
-			node *temp=inordersucc(root->right);
-			root->data=temp->data;
-			root->right=del(root->right,temp->data);
+			else
+			{
+				node* temp=inordersucc(root->right);
+				root->data=temp->data;
+				root->right=del(root->right,temp->data);
+			}
 	}
 	return root;
 }
-int BST::height(node* root) //calc height of bst
+int BST::height(node* root)
 {
 	if(root==NULL)
 		return 0;
@@ -173,73 +203,92 @@ int BST::height(node* root) //calc height of bst
 		int r=height(root->right);
 		return max(l,r)+1;
 	}
-		
 }
 int main()
 {
 	BST b;
-	int key,ch,x,key1;
-	//menu-driven
+	int ch;
 	do
 	{
-	cout<<"\n\t\t*=+*=+*=+*=+*=+*=+*=+*=+*=+*=+*=+*=+ \n\t\t    Binary Search Tree Operations \n\t\t*=+*=+*=+*=+*=+*=+*=+*=+*=+*=+*+=*=+";
-	cout<<"\n1.Create a Binary Search Tree.\n2.Display.\n3.In-Order traversal.\n4.Pre-Order traversal.\n5.Post-Order traversal.\n6.Search.\n7.Delete Node.\n8.Height Of BST.\n9.Exit.\nEnter your Choice:";
-	cin>>ch;
-	switch(ch)
-	{
-		case 1:
-				b.create();
-				break;
-		case 2:
-			cout<<"\nDisplay Binary Search Tree -=>"<<endl;
-			b.display(b.root,1);
-			break;
-		case 3:
-				cout<<"\n\n\n";
-				cout<<"In-Order traversal: ";
-				b.inorder(b.root);
-				break;
-		case 4:
-				cout<<"\n";
-				cout<<"Pre-Order traversal: ";
-				b.preorder(b.root);
-				break;
-		case 5:
-				cout<<"\n";
-				cout<<"Post-Order traversal: ";
-				b.postorder(b.root);
-				break;
-		case 6:
-				cout<<"\n";
-				cout<<"\nSearch an element-->"<<endl;
-				cout<<"\nEnter the key to be searched :";
-				cin>>key;
-				x=b.search(b.root,key);
-				if(x==1)
-					cout<<"\nFound!!"<<endl;
-				else
-					cout<<"\nNot Found!!"<<endl;
-				break;
-		case 7:
-				cout<<"\nDelete a Node-->"<<endl;
-				cout<<"\nEnter the key to be deleted :";
-				cin>>key1;
-				x=b.search(b.root,key1);
-				if(x==1)
-				{
-					cout<<"\nDeleted!!"<<endl;
-					b.del(b.root,key1);
+		cout<<"\n\t\t*-+*+-*+--+**+-*-+*-+*+-*+--+**+-*-+ \n\t\t    Binary Search Tree Operations \n\t\t*-+*+-*+--+**+-*-+*-+*+-*+--+**+-*-+"<<endl;
+		cout<<"\n1.Enter the data in BST.\n2.Display BST.\n3.In-Order Traversal.";
+		cout<<"\n4.Pre-Order Traversal.\n5.Post-order Traversal.\n6.Search.\n7.Delete.\n8.Height Of BST.\n9.Exit.";
+		cout<<"\nEnter you choice :";
+		cin>>ch;
+		        switch(ch)
+		        {
+		        	case 1:
+		        	{
+		        		b.create();
+					cout<<"\n";
+					break;
 				}
-				else
-					cout<<"\nNot Found,cannot delete!!"<<endl;
-				break;
-		case 8:
-				cout<<"\nHeight of the binary search tree is : "<<b.height(b.root)<<endl;
-				break;
-		case 9:
-				return 0;
-		default:
-				cout<<"\nInvalid Choice!!"<<endl;
-	}
+				case 2:
+				{
+					cout<<"\nRoot is:"<<b.root->retData()<<endl<<endl;
+					b.display(b.root,0);
+					cout<<endl;
+					break;
+				}
+				case 3:
+				{
+					cout<<"\nIn-Order Traversal : ";
+					b.inorder(b.root);
+					break;
+				}
+				case 4:
+				{
+					cout<<"\nPre-Order Traversal : ";
+					b.preorder(b.root);
+					break;
+				}
+				case 5:	
+				{
+					cout<<"\nPost-Order Traversal : ";
+					b.postorder(b.root);
+					break;
+				}
+				case 6:
+				{
+					int key;
+					cout<<"\nEnter the key you want to search :";
+					cin>>key;
+					int x=b.search(b.root,key);
+					if(x==1)
+						cout<<"\nKey Found!"<<endl;
+					else
+						cout<<"\nKey not found!"<<endl;
+					break;
+				}
+				case 7:
+				{
+					int item;
+					cout<<"\nEnter the element to be deleted:";
+					cin>>item;
+					int y=b.search(b.root,item);
+					if(y==1)
+					{
+						cout<<"\n"<<item<<" Deleted!";
+						b.del(b.root,item);
+					}
+					else
+						cout<<"\nNot Found,cannot delete!";
+					break;
+				}
+				case 8:
+					{
+						cout<<"\nThe Height of the Binary Search Tree is :"<<b.height(b.root)<<endl;
+						break;
+					}
+				case 9:
+				{
+					return 0;
+		        	}
+		        	default:
+		        		{
+		        			cout<<"\nInvalid choice!!!Enter a valid choice!!"<<endl;
+		        		}
+		        }
 	}while(ch!=9);
+	cout<<endl<<endl;
 }
